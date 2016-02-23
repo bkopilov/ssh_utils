@@ -1,11 +1,11 @@
 import inspect
 import logging
 import os
+import paramiko
 import select
 import signal
 import time
 
-import paramiko
 
 POLLING_INTERVAL = 90
 SSH_READ_BUFF = 1024
