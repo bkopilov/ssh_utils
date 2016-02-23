@@ -16,4 +16,4 @@ if __name__ == "__main__":
                    the_user=base64.b64decode(THE_USER),
                    the_password=base64.b64decode(THE_PASSWORD)) as ssh:
 
-        common.login_as_stack(ssh)
+        common.get_undercloud_nodes(ssh)
