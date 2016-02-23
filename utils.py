@@ -32,7 +32,7 @@ def whosdaddy():
 
 
 class SSH(object):
-    def __init__(self, ip, key_file=None, send_password=False,
+    def __init__(self, ip, key_file=None, send_password=True,
                  local_dest_dir=WORKSPACE, job_name=JOB_NAME, the_user="root",
                  the_password="qum5net", ssh_attempts=10, port=22):
         self.client = paramiko.SSHClient()
@@ -47,10 +47,7 @@ class SSH(object):
         self.str_list = []
         dict_args = locals().items()
         for attempt in range(1, ssh_attempts + 1):
-            logger.info("SSH attemp to {0}| retry:{1}| args:{2}"
-                        .format(ip,
-                                attempt,
-                                dict_args))
+            logger.info("#Trying ssh->")
             try:
                 if send_password is False:
                     self.client.set_missing_host_key_policy(
@@ -60,8 +57,7 @@ class SSH(object):
                                         key_filename=key_file,
                                         timeout=30,
                                         look_for_keys=False, port=port)
-                    logger.info("Logged in to:%s user:%s "
-                                % (self.ipv4, the_user))
+                    logger.info("<-#Logged in")
                     break
                 elif send_password is True:
                     self.client.set_missing_host_key_policy(
@@ -69,8 +65,7 @@ class SSH(object):
                     self.client.connect(hostname=self.ipv4,
                                         username=the_user,
                                         password=the_password, port=port)
-                    logger.info("Logged in to: %s user: %s" %
-                                (self.ipv4, the_user))
+                    logger.info("Logged in")
                     break
             except Exception as e:
                 logger.info(e)
@@ -116,7 +111,7 @@ class SSH(object):
         channel = transport.open_session()
         channel.get_pty()
         logger.info("[{0}]".format(whosdaddy()))
-        logger.info("{0}:{1}|{2}|{3}".format(self.ipv4, self.port, ">>", cmd))
+        logger.info("{0}|{1}".format(">>", cmd))
         # redirect al to stdout
         channel.exec_command(cmd + " 2>&1")
         while not channel.exit_status_ready():
@@ -138,7 +133,7 @@ class SSH(object):
                 if return_on_timeout:
                     logger.info("### TIMEOUT AFTER %s SECONDS-CMD:%s ###"
                                 % (total_wait_time, cmd))
-                    return self.str_list
+                    return "".join(self.str_list).splitlines()
             while channel.recv_stderr_ready() or channel.recv_ready():
                 str_ready = (channel.recv(SSH_READ_BUFF))
                 self.str_list.append(str_ready)
@@ -147,13 +142,13 @@ class SSH(object):
                     logger.info("%s|%s" % ("<<", line))
                     if prompt_str and prompt_str in line:
                         logger.info("prompt: %s found" % prompt_str)
-                        return self.str_list
+                        return "".join(self.str_list).splitlines()
         if not ignore_exit and channel.recv_exit_status() != 0:
             self.collect_logs_when_run_fails(self.local_dest_dir,
                                              self.job_name)
             logger.info("### FAILED - CMD:%s ###" % cmd)
             raise RuntimeError("###COMMAND ERROR: %s ###" % cmd)
-        return self.str_list
+        return "".join(self.str_list).splitlines()
 
     def sftp_put(self, local_file, remote_file):
         ssh_conn = self.client
@@ -180,7 +175,7 @@ class SSH(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        logger.info("ssh __exit__%s %s " % (self.ipv4, self.port))
+        logger.info("ssh __exit__%s %s ")
         try:
             self.client.close()
         except Exception:
