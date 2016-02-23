@@ -1,9 +1,9 @@
 import base64
 import utils
-
+import common
 if __name__ == "__main__":
 
-    IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAx"
+    IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAy"
     THE_USER = "cm9vdA=="
     THE_PASSWORD = "MVMwbHV0MW9uIQ=="
     """ the password / ipv4 encrypted base64.b64encode("PASS")
@@ -15,5 +15,5 @@ if __name__ == "__main__":
     with utils.SSH(base64.b64decode(IP_ADDRESS),
                    the_user=base64.b64decode(THE_USER),
                    the_password=base64.b64decode(THE_PASSWORD)) as ssh:
-        rep = ssh.send_cmd("ls -l")
-        print rep
+
+        common.login_as_stack(ssh)
