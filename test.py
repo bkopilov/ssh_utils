@@ -4,7 +4,7 @@ import common
 if __name__ == "__main__":
 
     IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAy"
-    THE_USER = "cm9vdA=="
+    THE_USER = "c3RhY2s="
     THE_PASSWORD = "MVMwbHV0MW9uIQ=="
     """ the password / ipv4 encrypted base64.b64encode("PASS")
         import base64
