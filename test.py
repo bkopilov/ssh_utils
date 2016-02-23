@@ -3,9 +3,9 @@ import utils
 
 if __name__ == "__main__":
 
-    IP_ADDRESS = "MTI3LjAuMC4x"
+    IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAx"
     THE_USER = "cm9vdA=="
-    THE_PASSWORD = "SWRvaGFtdWQ5IQ=="
+    THE_PASSWORD = "MVMwbHV0MW9uIQ=="
     """ the password / ipv4 encrypted base64.b64encode("PASS")
         import base64
         print base64.b64encode()
@@ -17,7 +17,3 @@ if __name__ == "__main__":
                    the_password=base64.b64decode(THE_PASSWORD)) as ssh:
         rep = ssh.send_cmd("ls -l")
         print rep
-
-
-
-
