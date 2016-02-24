@@ -215,7 +215,7 @@ class UnderCloud(object):
                 extention[0])
             ext_list = ssh.send_cmd(self.source_overcloudrd() + " && " + ext)
             ext_str = ",".join(ext_list)
-            self.COMMANDS.append("{0} api_extensions {1} {2}"
+            self.COMMANDS.append("{0} {1} api_extensions {2}"
                                  .format(self.crudini_set, extention[1],
                                          ext_str))
 
