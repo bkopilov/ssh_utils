@@ -1,8 +1,10 @@
 import base64
 import utils
 import common
+import os
 if __name__ == "__main__":
-
+    CWD = os.path.dirname(os.path.realpath(__file__))
+    print CWD
     IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAy"
     THE_USER = "c3RhY2s="
     THE_PASSWORD = "MVMwbHV0MW9uIQ=="
@@ -29,4 +31,4 @@ if __name__ == "__main__":
         cloud.prepare_tempest_extension(ssh)
         cloud.prepare_tempest_conf_file(ssh)
         cloud.run_tempest_tests(ssh)
-
+        cloud.collect_testr_tests(ssh, local_dest_dir=CWD)

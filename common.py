@@ -13,7 +13,6 @@ class UnderCloud(object):
     TEMPEST_URL = "https://github.com/openstack/tempest.git"
     TEMPEST_DIR = "/home/stack/tempest_" + (datetime.datetime.today()).isoformat()
     TEMPEST_CONF_FILE = "{0}/tempest/etc/tempest.conf".format(TEMPEST_DIR)
-    CWD = os.path.dirname(os.path.realpath(__file__))
     CRUDINI_COMMANDS = []
 
     def __init__(self):
@@ -220,9 +219,17 @@ class UnderCloud(object):
         ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
         run_tempest = "cd {0} && testr run  --load-list={1} " \
                       "--subunit | tee >(subunit2junitxml " \
-                      "--output-to=xunit_temp0.xml) | " \
+                      "--output-to=xunit_temp.xml) | " \
                       "subunit-2to1 | {2} ".format(tempest_directory, tempest_directory + "/list-tests", tempest_directory + "/colorizer.py")
         ssh.send_cmd(run_tempest)
+
+    def collect_testr_tests(self, ssh, local_dest_dir):
+        ssh_conn = ssh.get_connection()
+        sftp = ssh_conn.open_sftp()
+        remote_xunit_file = os.path.join(self.TEMPEST_DIR, "xunit_temp.xml")
+        local_xunit_file = os.path.join(local_dest_dir, "testrtests.xml")
+        sftp.get(remote_xunit_file, local_xunit_file)
+        sftp.close()
 
 
 
