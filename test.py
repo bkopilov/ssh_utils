@@ -15,5 +15,17 @@ if __name__ == "__main__":
     with utils.SSH(base64.b64decode(IP_ADDRESS),
                    the_user=base64.b64decode(THE_USER),
                    the_password=base64.b64decode(THE_PASSWORD)) as ssh:
+        cloud = common.UnderCloud()
+        cloud.get_undercloud_nodes(ssh)
+        cloud.show_overcloud_nodes()
+        cloud.prepare_tempest_directory(ssh)
+        cloud.prepare_tempest_roles(ssh)
+        cloud.prepare_tempest_identity(ssh)
+        cloud.prepare_tempest_oslo()
+        cloud.prepare_tempest_debug()
+        cloud.prepare_tempest_services_enable()
+        cloud.prepare_tempest_image(ssh)
+        cloud.prepare_tempest_extension(ssh)
+        cloud.prepare_tempest_conf_file(ssh)
+        cloud.run_tempest_tests(ssh)
 
-        common.get_undercloud_nodes(ssh)
