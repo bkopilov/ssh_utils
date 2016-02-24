@@ -16,6 +16,7 @@ if __name__ == "__main__":
                    the_user=base64.b64decode(THE_USER),
                    the_password=base64.b64decode(THE_PASSWORD)) as ssh:
         cloud = common.UnderCloud()
+        cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
         cloud.prepare_tempest_directory(ssh)

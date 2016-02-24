@@ -1,5 +1,6 @@
 import logging
 import datetime
+import os.path
 logger = logging.getLogger(__name__)
 logger.propagate = False
 logger.setLevel(logging.INFO)
@@ -12,6 +13,7 @@ class UnderCloud(object):
     TEMPEST_URL = "https://github.com/openstack/tempest.git"
     TEMPEST_DIR = "/home/stack/tempest_" + (datetime.datetime.today()).isoformat()
     TEMPEST_CONF_FILE = "{0}/tempest/etc/tempest.conf".format(TEMPEST_DIR)
+    CWD = os.path.dirname(os.path.realpath(__file__))
     CRUDINI_COMMANDS = []
 
     def __init__(self):
@@ -23,6 +25,11 @@ class UnderCloud(object):
 
     def source_overcloudrd(self):
         return "source /home/stack/overcloudrc"
+
+    def run_cloud_cleanup(self, ssh):
+        clean_repo = "https://github.com/bkopilov/tempest_cleanup.git"
+        ssh.send_cmd("git clone {0}".format(clean_repo))
+        ssh.send_cmd("cd tempest_cleanup && ./tempest_cleanup.sh",ignore_exit=True)
 
     def get_undercloud_nodes(self, ssh):
         nova_list = """nova list | awk '{print $4 " " $12}' | sed  's/=/ /g' """
