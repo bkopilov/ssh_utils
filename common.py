@@ -214,6 +214,7 @@ class UnderCloud(object):
                       "--subunit | tee >(subunit2junitxml " \
                       "--output-to=xunit_temp0.xml) | " \
                       "subunit-2to1 | {2} ".format(tempest_directory, "list-tests", tempest_directory + "/colorizer.py")
+        ssh.send_cmd(run_tempest)
 
 
 
