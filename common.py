@@ -36,6 +36,7 @@ class UnderCloud(object):
 
     def run_cloud_cleanup(self, ssh):
         clean_repo = self.config["CLEANUP_CLOUD"]["GIT_REPO"]
+        ssh.send_cmd("rm -rf {0}".format(self.config["CLEANUP_CLOUD"]["DIRECTORY_NAME"]))
         ssh.send_cmd("git clone {0}".format(clean_repo))
         ssh.send_cmd("cd {0} && ./tempest_cleanup.sh"
                      .format(self.config["CLEANUP_CLOUD"]["DIRECTORY_NAME"]),
