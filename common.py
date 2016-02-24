@@ -74,7 +74,7 @@ class UnderCloud(object):
                      .format(self.config["TEMPEST"]["YUM_INSTALL"]),
                      ignore_exit=True)
         ssh.send_cmd("sudo easy_install pip ", ignore_exit=True)
-        ssh.send_cmd("sudo pip install "
+        ssh.send_cmd("sudo pip install --upgrade "
                      .format(self.config["TEMPEST"]["PIP_INSTALL"]),
                      ignore_exit=True)
 
@@ -229,6 +229,16 @@ class UnderCloud(object):
     def prepare_tempest_conf_file(self, ssh):
         for line in self.COMMANDS:
             ssh.send_cmd(line)
+
+    def add_neutron_public_network(self, ssh):
+        net_add = "neutron net-create nova --router:external" \
+                  " --provider:network_type vlan " \
+                  "--provider:physical_network physext --provider:segmentation_id 190"
+        subnet_add = "neutron subnet-create nova 192.168.190.0/24 " \
+                     "--allocation-pool start=192.168.190.2,end=192.168.190.30" \
+                     " --gateway 192.168.190.1"
+        ssh.send_cmd(self.source_overcloudrd() + " && " + net_add)
+        ssh.send_cmd(self.source_overcloudrd() + " && " + subnet_add)
 
     def run_tempest_tests(self, ssh):
         tempest_directory = self.TEMPEST_DIR + "/tempest"

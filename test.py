@@ -26,6 +26,8 @@ if __name__ == "__main__":
         cloud.prepare_tempest_services_enable()
         cloud.prepare_tempest_image(ssh)
         cloud.prepare_tempest_extension(ssh)
+        cloud.add_neutron_public_network(ssh)
+        cloud.prepare_tempest_public_net(ssh)
         cloud.prepare_tempest_conf_file(ssh)
         cloud.run_tempest_tests(ssh)
         cloud.collect_testr_tests(ssh, local_dest_dir=CWD)
