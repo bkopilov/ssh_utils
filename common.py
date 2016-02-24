@@ -10,7 +10,7 @@ logger.addHandler(consoleh)
 class UnderCloud(object):
 
     TEMPEST_URL = "https://github.com/openstack/tempest.git"
-    TEMPEST_DIR = "~/tempest_" + (datetime.datetime.today()).isoformat()
+    TEMPEST_DIR = "/home/stack/tempest_" + (datetime.datetime.today()).isoformat()
     TEMPEST_CONF_FILE = "{0}/tempest/etc/tempest.conf".format(TEMPEST_DIR)
     CRUDINI_COMMANDS = []
 
