@@ -14,7 +14,7 @@ if __name__ == "__main__":
     with utils.SSH(base64.b64decode(config["SSH"]['IP_ADDRESS']),
                    the_user=base64.b64decode(config["SSH"]['THE_USER']),
                    the_password=base64.b64decode(config["SSH"]['THE_PASSWORD'])) as ssh:
-        cloud = common.UnderCloud()
+        cloud = common.UnderCloud(config=config)
         cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
