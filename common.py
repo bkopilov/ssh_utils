@@ -205,7 +205,7 @@ class UnderCloud(object):
         tempest_directory = self.TEMPEST_DIR + "/tempest"
         testr_init = "cd {0} && testr init".format(tempest_directory)
         ssh.send_cmd(testr_init)
-        ssh.send_cmd("cd {0} && testr list-tests | tee  all_tests1".format(tempest_directory))
+        ssh.send_cmd("cd {0} && testr list-tests | tee  list-tests".format(tempest_directory))
         # download colorizer:
         colorizer = "cd {0} && {1}".format(tempest_directory,
                                            "wget https://raw.githubusercontent.com/openstack/tempest/8843f0f0768019c76be72b4be2f6a156cdbe3d78/tools/colorizer.py")
