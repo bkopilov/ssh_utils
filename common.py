@@ -210,6 +210,7 @@ class UnderCloud(object):
         colorizer = "cd {0} && {1}".format(tempest_directory,
                                            "wget https://raw.githubusercontent.com/openstack/tempest/8843f0f0768019c76be72b4be2f6a156cdbe3d78/tools/colorizer.py")
         ssh.send_cmd(colorizer)
+        ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
         run_tempest = "cd {0} && testr run  --load-list={1} " \
                       "--subunit | tee >(subunit2junitxml " \
                       "--output-to=xunit_temp0.xml) | " \
