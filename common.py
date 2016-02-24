@@ -1,3 +1,4 @@
+import json
 import logging
 import datetime
 import os.path
@@ -6,6 +7,12 @@ logger.propagate = False
 logger.setLevel(logging.INFO)
 consoleh = logging.StreamHandler()
 logger.addHandler(consoleh)
+
+
+def load_json_file(file_path):
+    json_date = open(file_path).read()
+    data = json.loads(json_date)
+    return data
 
 
 class UnderCloud(object):
@@ -230,7 +237,6 @@ class UnderCloud(object):
         local_xunit_file = os.path.join(local_dest_dir, "testrtests.xml")
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
-
 
 
 

@@ -4,19 +4,16 @@ import common
 import os
 if __name__ == "__main__":
     CWD = os.path.dirname(os.path.realpath(__file__))
-    print CWD
-    IP_ADDRESS = "MTkyLjE2OC4yNTAuMjAy"
-    THE_USER = "c3RhY2s="
-    THE_PASSWORD = "MVMwbHV0MW9uIQ=="
+    config = common.load_json_file(CWD + "/config.json")
     """ the password / ipv4 encrypted base64.b64encode("PASS")
         import base64
         print base64.b64encode()
         print base64.b64decode("cGFzc3dvcmQ=")
     """
 
-    with utils.SSH(base64.b64decode(IP_ADDRESS),
-                   the_user=base64.b64decode(THE_USER),
-                   the_password=base64.b64decode(THE_PASSWORD)) as ssh:
+    with utils.SSH(base64.b64decode(config["SSH"]['IP_ADDRESS']),
+                   the_user=base64.b64decode(config["SSH"]['THE_USER']),
+                   the_password=base64.b64decode(config["SSH"]['THE_PASSWORD'])) as ssh:
         cloud = common.UnderCloud()
         cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
