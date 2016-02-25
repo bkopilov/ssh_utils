@@ -19,7 +19,6 @@ if __name__ == "__main__":
         cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
-        """
         cloud.prepare_tempest_directory(ssh)
         cloud.prepare_tempest_roles(ssh)
         cloud.prepare_tempest_identity(ssh)
@@ -33,7 +32,6 @@ if __name__ == "__main__":
         cloud.prepare_tempest_conf_file(ssh)
         cloud.run_tempest_tests(ssh)
         cloud.collect_testr_tests(ssh, local_dest_dir=CWD)
-        """
         # collect logs from overcloud per box
         cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa",
                                 remote_file="/home/stack/.ssh/id_rsa")
