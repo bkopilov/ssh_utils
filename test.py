@@ -46,7 +46,7 @@ if __name__ == "__main__":
                            send_password=False) as ssh_controller:
                 # create tar.log file
                 cloud.compress_logs(ssh_controller, controller_name + ".tar.gz", chown="heat-admin:heat-admin")
-                cloud.copy_to_workspace(ssh, local_dest_dir=CWD,
+                cloud.copy_to_workspace(ssh_controller, local_dest_dir=CWD,
                                         local_file=controller_name + ".tar.gz",
                                         remote_file="/home/heat-admin/" + controller_name + ".tar.gz")
 
