@@ -275,7 +275,8 @@ class UnderCloud(object):
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
 
-    def copy_to_workspace(self, ssh, local_dest_dir, local_file, remote_file):
+    @staticmethod
+    def copy_to_workspace(ssh, local_dest_dir, local_file, remote_file):
         ssh_conn = ssh.get_connection()
         sftp = ssh_conn.open_sftp()
         remote_xunit_file = os.path.join(remote_file)
@@ -283,6 +284,7 @@ class UnderCloud(object):
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
 
+    @staticmethod
     def compress_logs(ssh, log_name):
         logs_line = "sudo tar --warning=no-file-changed -czf %s /var/log /etc" % log_name
         ssh.send_cmd(logs_line, ignore_exit=True)
