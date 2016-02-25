@@ -26,7 +26,7 @@
     "PIP_INSTALL" : "junitxml tox virtualenv six",
     "IMAGE_URL" : "http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img",
     "COLORIZED" : "https://raw.githubusercontent.com/openstack/tempest/8843f0f0768019c76be72b4be2f6a156cdbe3d78/tools/colorizer.py",
-    "FILTER_TESTS": "grep api.identity.admin"
+    "FILTER_TESTS": "grep identity.admin.v3.test_services"
   },
   "CRUDINI" : "crudini --format=ini --set ",
   "EXT_NET":
