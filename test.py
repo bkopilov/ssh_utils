@@ -44,6 +44,10 @@ if __name__ == "__main__":
                            the_user="heat-admin",
                            key_file=CWD + "/id_rsa",
                            send_password=False) as ssh_controller:
-                ssh_controller.send_cmd("ls -l")
+                # create tar.log file
+                cloud.compress_logs(ssh_controller, controller_name + ".tar.gz")
+                cloud.copy_to_workspace(ssh, local_dest_dir=CWD,
+                                        local_file=controller_name + ".tar.gz",
+                                        remote_file="/home/heat-admin/" + controller_name + ".tar.gz")
 
 

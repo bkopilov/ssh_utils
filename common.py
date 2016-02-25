@@ -283,3 +283,7 @@ class UnderCloud(object):
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
 
+    def compress_logs(ssh, log_name):
+        logs_line = "sudo tar --warning=no-file-changed -czf %s /var/log /etc" % log_name
+        ssh.send_cmd(logs_line, ignore_exit=True)
+
