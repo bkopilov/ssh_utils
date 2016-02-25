@@ -43,10 +43,10 @@ if __name__ == "__main__":
             with utils.SSH(node_ip,
                            the_user="heat-admin",
                            key_file=CWD + "/id_rsa",
-                           send_password=False) as ssh_controller:
+                           send_password=False) as ssh_node:
                 # create tar.log file
-                cloud.compress_logs(ssh_controller, node_name + ".tar.gz", chown="heat-admin:heat-admin")
-                cloud.copy_to_workspace(ssh_controller, local_dest_dir=CWD,
+                cloud.compress_logs(ssh_node, node_name + ".tar.gz", chown="heat-admin:heat-admin")
+                cloud.copy_to_workspace(ssh_node, local_dest_dir=CWD,
                                         local_file=node_name + ".tar.gz",
                                         remote_file="/home/heat-admin/" + node_name + ".tar.gz")
 
