@@ -290,6 +290,6 @@ class UnderCloud(object):
         ssh.send_cmd(logs_line, ignore_exit=True)
         if chown:
             ssh.send_cmd("sudo chown {0} {1}".format(chown, log_name))
-            ssh.send_cmd("sudo chmod 777 {1}".format(log_name))
+            ssh.send_cmd("sudo chmod 777 {0}".format(log_name))
 
 
