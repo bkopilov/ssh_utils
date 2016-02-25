@@ -289,7 +289,7 @@ class UnderCloud(object):
         logs_line = "sudo tar --warning=no-file-changed -czf %s /var/log /etc" % log_name
         ssh.send_cmd(logs_line, ignore_exit=True)
         if chown:
-            ssh.send_cmd("chown {0} {1}".format(chown, log_name))
-            ssh.send_cmd("chmod 777 {1}".format(log_name))
+            ssh.send_cmd("sudo chown {0} {1}".format(chown, log_name))
+            ssh.send_cmd("sudo chmod 777 {1}".format(log_name))
 
 
