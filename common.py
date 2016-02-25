@@ -50,9 +50,9 @@ class UnderCloud(object):
             node_list = node.split()
             if "ctlplane" in node:
                 if "controller" in node:
-                    self.controller_nodes.append(node_list[2])
+                    self.controller_nodes.append([node_list[0], node_list[2]])
                 elif "compute" in node:
-                    self.compute_nodes.append(node_list[2])
+                    self.compute_nodes.append([node_list[0], node_list[2]])
 
     def show_overcloud_nodes(self):
         for controller in self.controller_nodes:
@@ -274,3 +274,12 @@ class UnderCloud(object):
         local_xunit_file = os.path.join(local_dest_dir, "xunit_temp.xml")
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
+
+    def copy_to_workspace(self, ssh, local_dest_dir, local_file, remote_file):
+        ssh_conn = ssh.get_connection()
+        sftp = ssh_conn.open_sftp()
+        remote_xunit_file = os.path.join(remote_file)
+        local_xunit_file = os.path.join(local_dest_dir, local_file)
+        sftp.get(remote_xunit_file, local_xunit_file)
+        sftp.close()
+
