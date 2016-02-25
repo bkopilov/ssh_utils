@@ -19,8 +19,7 @@ def load_json_file(file_path):
 class UnderCloud(object):
     def __init__(self, config=None):
         self.config = config
-        self.controller_nodes = list()
-        self.compute_nodes = list()
+        self.nodes = list()
         self.TEMPEST_URL = config["TEMPEST"]["GIT_REPO"]
         self.TEMPEST_DIR = "{0}/tempest_".format(config["TEMPEST"]["WORKING_DIRECTORY"]) \
                            + (datetime.datetime.today()).isoformat()
@@ -49,16 +48,11 @@ class UnderCloud(object):
         for node in nodes:
             node_list = node.split()
             if "ctlplane" in node:
-                if "controller" in node:
-                    self.controller_nodes.append([node_list[0], node_list[2]])
-                elif "compute" in node:
-                    self.compute_nodes.append([node_list[0], node_list[2]])
+                self.nodes.append([node_list[0], node_list[2]])
 
     def show_overcloud_nodes(self):
-        for controller in self.controller_nodes:
-            logger.info("Controller: {0}".format(controller))
-        for compute in self.compute_nodes:
-            logger.info("Compute: {0}".format(compute))
+        for node in self.nodes:
+            logger.info("Node: {0}".format(node))
 
     def prepare_tempest_directory(self, ssh):
         self.prepare_packages_for_tempest(ssh)

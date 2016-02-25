@@ -37,17 +37,17 @@ if __name__ == "__main__":
         # collect logs from overcloud per box
         cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa",
                                 remote_file="/home/stack/.ssh/id_rsa")
-        for controller in cloud.controller_nodes:
-            controller_name = controller[0]
-            controller_ip = controller[1]
-            with utils.SSH(controller_ip,
+        for node in cloud.nodes:
+            node_name = node[0]
+            node_ip = node[1]
+            with utils.SSH(node_ip,
                            the_user="heat-admin",
                            key_file=CWD + "/id_rsa",
                            send_password=False) as ssh_controller:
                 # create tar.log file
-                cloud.compress_logs(ssh_controller, controller_name + ".tar.gz", chown="heat-admin:heat-admin")
+                cloud.compress_logs(ssh_controller, node_name + ".tar.gz", chown="heat-admin:heat-admin")
                 cloud.copy_to_workspace(ssh_controller, local_dest_dir=CWD,
-                                        local_file=controller_name + ".tar.gz",
-                                        remote_file="/home/heat-admin/" + controller_name + ".tar.gz")
+                                        local_file=node_name + ".tar.gz",
+                                        remote_file="/home/heat-admin/" + node_name + ".tar.gz")
 
 
