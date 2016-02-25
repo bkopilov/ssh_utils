@@ -271,6 +271,6 @@ class UnderCloud(object):
         ssh_conn = ssh.get_connection()
         sftp = ssh_conn.open_sftp()
         remote_xunit_file = os.path.join(self.TEMPEST_DIR, "xunit_temp.xml")
-        local_xunit_file = os.path.join(local_dest_dir, "testrtests.xml")
+        local_xunit_file = os.path.join(local_dest_dir, "xunit_temp.xml")
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
