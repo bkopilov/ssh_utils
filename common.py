@@ -279,6 +279,20 @@ class UnderCloud(object):
         sftp.close()
 
     @staticmethod
+    def copy_from_workspace(ssh, local_dest_dir, local_file, remote_file,
+                            chown=None):
+        ssh_conn = ssh.get_connection()
+        sftp = ssh_conn.open_sftp()
+        remote_file = os.path.join(remote_file)
+        local_file = os.path.join(local_dest_dir, local_file)
+        ssh.send_cmd("sudo rm -rf {0}".format(remote_file),ignore_exit=True)
+        sftp.put(local_file, remote_file)
+        if chown:
+            ssh.send_cmd("sudo chown {0} {1}".format(chown, remote_file))
+            ssh.send_cmd("sudo chmod 777 {0}".format(remote_file))
+        sftp.close()
+
+    @staticmethod
     def compress_logs(ssh, log_name, chown=None):
         logs_line = "sudo tar --warning=no-file-changed -czf %s /var/log /etc" % log_name
         ssh.send_cmd(logs_line, ignore_exit=True)

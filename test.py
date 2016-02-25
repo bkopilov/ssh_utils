@@ -16,9 +16,17 @@ if __name__ == "__main__":
                    the_password=base64.b64decode(config["SSH"]['THE_PASSWORD'])
                    ) as ssh:
         cloud = common.UnderCloud(config=config)
-        cloud.run_cloud_cleanup(ssh)
+        #cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
+        cloud.copy_from_workspace(ssh, local_dest_dir=CWD,
+                                  local_file="clean_logs.sh",
+                                  remote_file="/home/stack/clean_logs.sh",
+                                  chown="stack:stack")
+        # cleanup logs on all machines
+        for node in cloud.nodes:
+            node_ip = node[1]
+            ssh.send_cmd("ssh heat-admin@{0} 'sudo bash -s' < clean_logs.sh".format(node_ip))
         cloud.prepare_tempest_directory(ssh)
         cloud.prepare_tempest_roles(ssh)
         cloud.prepare_tempest_identity(ssh)
