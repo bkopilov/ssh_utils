@@ -20,11 +20,23 @@
   "TEMPEST":
   {
     "GIT_REPO" : "https://github.com/openstack/tempest.git",
+    "REDHAT_REPO" : "https://github.com/redhat-openstack/tempest.git",
     "WORKING_DIRECTORY" : "/home/stack",
     "YUM_INSTALL" : "gcc wget libxslt-devel libxml2-devel python-devel openssl-devel libffi-devel python-testtools",
     "PIP_INSTALL" : "junitxml tox virtualenv six",
     "IMAGE_URL" : "http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img",
-    "COLORIZED" : "https://raw.githubusercontent.com/openstack/tempest/8843f0f0768019c76be72b4be2f6a156cdbe3d78/tools/colorizer.py"
+    "COLORIZED" : "https://raw.githubusercontent.com/openstack/tempest/8843f0f0768019c76be72b4be2f6a156cdbe3d78/tools/colorizer.py",
+    "FILTER_TESTS": "grep api.identity.admin"
   },
-  "CRUDINI" : "crudini --format=ini --set "
+  "CRUDINI" : "crudini --format=ini --set ",
+  "EXT_NET":
+  {
+    "EXTERNAL_SUBNET": "192.168.190.0/24",
+    "START_POOL" : "192.168.190.2",
+    "END_POOL" : "192.168.190.30",
+    "GATEWAY" : "192.168.190.1",
+    "NET_TYPE" : "vlan",
+    "PROVIDER" : "physext",
+    "SEGMENT" : "190"
+  }
 }

@@ -10,8 +10,8 @@ import time
 POLLING_INTERVAL = 90
 SSH_READ_BUFF = 1024
 CWD = os.path.dirname(os.path.realpath(__file__))
-WORKSPACE = CWD + "/../../"
-JOB_NAME = "SSH_UTILS"
+WORKSPACE = CWD
+JOB_NAME = "JOB"
 logger = logging.getLogger(__name__)
 logger.propagate = False
 logger.setLevel(logging.INFO)

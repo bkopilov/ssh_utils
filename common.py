@@ -232,11 +232,18 @@ class UnderCloud(object):
 
     def add_neutron_public_network(self, ssh):
         net_add = "neutron net-create nova --router:external" \
-                  " --provider:network_type vlan " \
-                  "--provider:physical_network physext --provider:segmentation_id 190"
-        subnet_add = "neutron subnet-create nova 192.168.190.0/24 " \
-                     "--allocation-pool start=192.168.190.2,end=192.168.190.30" \
-                     " --gateway 192.168.190.1"
+                  " --provider:network_type {0} " \
+                  "--provider:physical_network {1} --provider:segmentation_id {2}"\
+            .format(self.config["EXT_NET"]["NET_TYPE"],
+                    self.config["EXT_NET"]["PROVIDER"],
+                    self.config["EXT_NET"]["SEGMENT"])
+        subnet_add = "neutron subnet-create nova {0} " \
+                     "--allocation-pool start={1},end={2}" \
+                     " --gateway {3}".format(
+            self.config["EXT_NET"]["EXTERNAL_SUBNET"],
+            self.config["EXT_NET"]["START_POOL"],
+            self.config["EXT_NET"]["END_POOL"],
+            self.config["EXT_NET"]["GATEWAY"])
         ssh.send_cmd(self.source_overcloudrd() + " && " + net_add)
         ssh.send_cmd(self.source_overcloudrd() + " && " + subnet_add)
 
@@ -244,7 +251,9 @@ class UnderCloud(object):
         tempest_directory = self.TEMPEST_DIR + "/tempest"
         testr_init = "cd {0} && testr init".format(tempest_directory)
         ssh.send_cmd(testr_init)
-        ssh.send_cmd("cd {0} && testr list-tests | tee  list-tests".format(tempest_directory))
+        filter_tests = self.config["TEMPEST"]["FILTER_TESTS"]
+        ssh.send_cmd("cd {0} && testr list-tests | {1} tee  list-tests"
+                     .format(tempest_directory, filter_tests))
         # download colorizer:
         colorizer = "cd {0} &&  wget" \
                     " {1}".format(tempest_directory,
@@ -256,7 +265,7 @@ class UnderCloud(object):
                       "--output-to=xunit_temp.xml) | " \
                       "subunit-2to1 | {2} ".format(tempest_directory, tempest_directory + "/list-tests",
                                                    tempest_directory + "/colorizer.py")
-        ssh.send_cmd(run_tempest)
+        ssh.send_cmd(run_tempest, timeout=9600, ignore_exit=True)
 
     def collect_testr_tests(self, ssh, local_dest_dir):
         ssh_conn = ssh.get_connection()
