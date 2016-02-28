@@ -2,6 +2,7 @@ import base64
 import utils
 import common
 import os
+
 if __name__ == "__main__":
     CWD = os.path.dirname(os.path.realpath(__file__))
     config = common.load_json_file(CWD + "/config.json")
@@ -19,17 +20,20 @@ if __name__ == "__main__":
         # copy private key to workspace
         cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa.tar.gz",
                                 remote_file="/home/stack/.ssh/id_rsa")
-        #cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
-        cloud.copy_from_workspace(ssh, local_dest_dir=CWD,
-                                  local_file="clean_logs.sh",
-                                  remote_file="/home/stack/clean_logs.sh",
-                                  chown="stack:stack")
         # cleanup logs on all machines
         for node in cloud.nodes:
             node_ip = node[1]
-            ssh.send_cmd("ssh heat-admin@{0} 'sudo bash -s' < clean_logs.sh".format(node_ip))
+            with utils.SSH(node_ip,
+                           the_user="heat-admin",
+                           key_file=CWD + "/id_rsa.tar.gz",
+                           send_password=False) as ssh_node:
+                cloud.copy_from_workspace(ssh_node, local_dest_dir=CWD,
+                                          local_file="clean_logs.sh",
+                                          remote_file="/home/heat-admin/clean_logs.sh",
+                                          chown="heat-admin:heat-admin")
+                ssh.send_cmd("sudo /home/heat-admin/clean_logs.sh", ignore_exit=True)
         cloud.prepare_tempest_directory(ssh)
         cloud.prepare_tempest_roles(ssh)
         cloud.prepare_tempest_identity(ssh)
@@ -57,5 +61,3 @@ if __name__ == "__main__":
                 cloud.copy_to_workspace(ssh_node, local_dest_dir=CWD,
                                         local_file=node_name + ".tar.gz",
                                         remote_file="/home/heat-admin/" + node_name + ".tar.gz")
-
-
