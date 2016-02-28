@@ -22,6 +22,7 @@ if __name__ == "__main__":
                                 remote_file="/home/stack/.ssh/id_rsa")
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
+        cloud.get_overcloud_status(ssh)
         # cleanup logs on all machines
         for node in cloud.nodes:
             node_ip = node[1]

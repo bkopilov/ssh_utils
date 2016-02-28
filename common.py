@@ -30,7 +30,7 @@ class UnderCloud(object):
     def source_stackrc(self):
         return "source {0}".format(self.config["UNDERCLOUD"]["STACKRC"])
 
-    def source_overcloudrd(self):
+    def source_overcloudrc(self):
         return "source {0}".format(self.config["UNDERCLOUD"]["OVERCLOUDRC"])
 
     def run_cloud_cleanup(self, ssh):
@@ -49,6 +49,10 @@ class UnderCloud(object):
             node_list = node.split()
             if "ctlplane" in node:
                 self.nodes.append([node_list[0], node_list[2]])
+
+    def get_overcloud_status(self, ssh):
+        cmd = self.source_overcloudrc() + "&&" + "openstack-status"
+        ssh.send_cmd(cmd)
 
     def show_overcloud_nodes(self):
         for node in self.nodes:
@@ -75,12 +79,12 @@ class UnderCloud(object):
     def prepare_tempest_roles(self, ssh):
         # role list:
         role_list = """ openstack role list | awk '{print $4}' | grep -v -E "^$|Name" """
-        cmd = self.source_overcloudrd() + "&&" + role_list
+        cmd = self.source_overcloudrc() + "&&" + role_list
         current_roles = ssh.send_cmd(cmd)
         needed_roles = ["admin", "_member_", "heat_stack_user", "ResellerAdmin", "swiftoperator", "heat_stack_owner"]
         for role_name in needed_roles:
             if role_name not in current_roles:
-                ssh.send_cmd(self.source_overcloudrd() + "&&" +
+                ssh.send_cmd(self.source_overcloudrc() + "&&" +
                              "openstack role create {0}".format(role_name))
         self.COMMANDS.append("{0} auth tempest_roles _member_"
                              .format(self.crudini_set))
@@ -101,26 +105,26 @@ class UnderCloud(object):
         # user-lists:
         user_list = """openstack user list  | awk '{print $4}' | grep -v -E "^$|Name" """
         tenant_list = """openstack project list  | awk '{print $4}' | grep -v -E "^$|Name" """
-        current_user_list = ssh.send_cmd(self.source_overcloudrd() + "&&" + user_list)
-        current_tenant_list = ssh.send_cmd(self.source_overcloudrd() + "&&" + tenant_list)
+        current_user_list = ssh.send_cmd(self.source_overcloudrc() + "&&" + user_list)
+        current_tenant_list = ssh.send_cmd(self.source_overcloudrc() + "&&" + tenant_list)
         needed_users_tenants = ["demo", "alt_demo"]
         for user in needed_users_tenants:
             if user in current_user_list:
-                ssh.send_cmd(self.source_overcloudrd() + "&&" + "openstack user delete {0}".format(user))
+                ssh.send_cmd(self.source_overcloudrc() + "&&" + "openstack user delete {0}".format(user))
         for tenant in needed_users_tenants:
             if tenant in current_tenant_list:
-                ssh.send_cmd(self.source_overcloudrd() + "&&" + "openstack project delete {0}".format(tenant))
+                ssh.send_cmd(self.source_overcloudrc() + "&&" + "openstack project delete {0}".format(tenant))
         # create new project and user
         for user in needed_users_tenants:
             tenant_create = "openstack project create {0} --description {0}" \
                             " --enable | grep ' id ' |awk '{{print $4}}'" \
                 .format(user)
-            tenant_id = ssh.send_cmd(self.source_overcloudrd() + " && "
+            tenant_id = ssh.send_cmd(self.source_overcloudrc() + " && "
                                      + tenant_create)
             user_create = "openstack user create {0} --project {1}" \
                           " --password secrete --enable" \
                 .format(user, tenant_id[0])
-            ssh.send_cmd(self.source_overcloudrd() + " && " + user_create)
+            ssh.send_cmd(self.source_overcloudrc() + " && " + user_create)
         # update curdini
         self.COMMANDS.append("{0} identity username demo"
                              .format(self.crudini_set))
@@ -135,7 +139,7 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} identity alt_password secrete"
                              .format(self.crudini_set))
         # update admin :
-        admin_pass = ssh.send_cmd(self.source_overcloudrd() + " && " +
+        admin_pass = ssh.send_cmd(self.source_overcloudrc() + " && " +
                                   "echo $OS_PASSWORD")
         self.COMMANDS.append("{0} identity admin_username admin"
                              .format(self.crudini_set))
@@ -146,7 +150,7 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} identity admin_password {1}"
                              .format(self.crudini_set, admin_pass[0]))
         # uri endpoint and horizon:
-        uri_v2 = ssh.send_cmd(self.source_overcloudrd() + " && " +
+        uri_v2 = ssh.send_cmd(self.source_overcloudrc() + " && " +
                               "echo $OS_AUTH_URL")
         uri_v3 = uri_v2[0].split(":5000")[0] + ":5000/v3/"
         self.COMMANDS.append("{0} identity uri {1}".format(self.crudini_set, uri_v2[0]))
@@ -162,7 +166,7 @@ class UnderCloud(object):
 
         # admin tenant_id
         admin_tenant_cmd = "openstack project list | grep admin | awk '{{print $2}}'"
-        admin_tenant_id = ssh.send_cmd(self.source_overcloudrd() + " && " + admin_tenant_cmd)
+        admin_tenant_id = ssh.send_cmd(self.source_overcloudrc() + " && " + admin_tenant_cmd)
         self.COMMANDS.append("{0} identity admin_tenant_id {1}"
                              .format(self.crudini_set, admin_tenant_id[0]))
 
@@ -188,8 +192,8 @@ class UnderCloud(object):
         create_image = "openstack image create {0} " \
                        "--public --container-format=bare " \
                        "--disk-format=qcow2 < {0} | grep id| awk '{{print $4}}'".format(image_name)
-        ssh.send_cmd(self.source_overcloudrd() + " && " + "wget " + image_url)
-        image_id = ssh.send_cmd(self.source_overcloudrd() + " && " + create_image)
+        ssh.send_cmd(self.source_overcloudrc() + " && " + "wget " + image_url)
+        image_id = ssh.send_cmd(self.source_overcloudrc() + " && " + create_image)
         self.COMMANDS.append("{0} compute image_ssh_user cirros"
                              .format(self.crudini_set))
         self.COMMANDS.append("{0} compute image_ref {1}"
@@ -207,7 +211,7 @@ class UnderCloud(object):
         for extention in extention_services:
             ext = "openstack extension list {0} -c Alias | grep -v -E '\-\-\-|Alias' | awk '{{print $2}}'".format(
                 extention[0])
-            ext_list = ssh.send_cmd(self.source_overcloudrd() + " && " + ext)
+            ext_list = ssh.send_cmd(self.source_overcloudrc() + " && " + ext)
             ext_str = ",".join(ext_list)
             self.COMMANDS.append("{0} {1} api_extensions {2}"
                                  .format(self.crudini_set, extention[1],
@@ -216,7 +220,7 @@ class UnderCloud(object):
     def prepare_tempest_public_net(self, ssh):
         # assume nova is the external network
         public_net = "openstack network list  -c ID -c Name| grep public | awk '{{ print $2}}'"
-        public_network_id = ssh.send_cmd(self.source_overcloudrd() + "&& " + public_net)
+        public_network_id = ssh.send_cmd(self.source_overcloudrc() + "&& " + public_net)
         self.COMMANDS.append("{0} network public_network_id {1}"
                              .format(self.crudini_set, public_network_id[0]))
 
@@ -238,8 +242,8 @@ class UnderCloud(object):
             self.config["EXT_NET"]["START_POOL"],
             self.config["EXT_NET"]["END_POOL"],
             self.config["EXT_NET"]["GATEWAY"])
-        ssh.send_cmd(self.source_overcloudrd() + " && " + net_add)
-        ssh.send_cmd(self.source_overcloudrd() + " && " + subnet_add)
+        ssh.send_cmd(self.source_overcloudrc() + " && " + net_add)
+        ssh.send_cmd(self.source_overcloudrc() + " && " + subnet_add)
 
     def run_tempest_tests(self, ssh):
         tempest_directory = self.TEMPEST_DIR + "/tempest"
