@@ -215,7 +215,7 @@ class UnderCloud(object):
 
     def prepare_tempest_public_net(self, ssh):
         # assume nova is the external network
-        public_net = "openstack network list  -c ID -c Name| grep nova | awk '{{ print $2}}'"
+        public_net = "openstack network list  -c ID -c Name| grep public | awk '{{ print $2}}'"
         public_network_id = ssh.send_cmd(self.source_overcloudrd() + "&& " + public_net)
         self.COMMANDS.append("{0} network public_network_id {1}"
                              .format(self.crudini_set, public_network_id[0]))
@@ -225,13 +225,13 @@ class UnderCloud(object):
             ssh.send_cmd(line)
 
     def add_neutron_public_network(self, ssh):
-        net_add = "neutron net-create nova --router:external" \
+        net_add = "neutron net-create public --router:external" \
                   " --provider:network_type {0} " \
                   "--provider:physical_network {1} --provider:segmentation_id {2}"\
             .format(self.config["EXT_NET"]["NET_TYPE"],
                     self.config["EXT_NET"]["PROVIDER"],
                     self.config["EXT_NET"]["SEGMENT"])
-        subnet_add = "neutron subnet-create nova {0} " \
+        subnet_add = "neutron subnet-create public {0} " \
                      "--allocation-pool start={1},end={2}" \
                      " --gateway {3}".format(
             self.config["EXT_NET"]["EXTERNAL_SUBNET"],
