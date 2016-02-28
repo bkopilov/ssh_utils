@@ -16,6 +16,9 @@ if __name__ == "__main__":
                    the_password=base64.b64decode(config["SSH"]['THE_PASSWORD'])
                    ) as ssh:
         cloud = common.UnderCloud(config=config)
+        # copy private key to workspace
+        cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa.tar.gz",
+                                remote_file="/home/stack/.ssh/id_rsa")
         #cloud.run_cloud_cleanup(ssh)
         cloud.get_undercloud_nodes(ssh)
         cloud.show_overcloud_nodes()
@@ -41,14 +44,13 @@ if __name__ == "__main__":
         cloud.run_tempest_tests(ssh)
         cloud.collect_testr_tests(ssh, local_dest_dir=CWD)
         # collect logs from overcloud per box
-        cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa",
-                                remote_file="/home/stack/.ssh/id_rsa")
+
         for node in cloud.nodes:
             node_name = node[0]
             node_ip = node[1]
             with utils.SSH(node_ip,
                            the_user="heat-admin",
-                           key_file=CWD + "/id_rsa",
+                           key_file=CWD + "/id_rsa.tar.gz",
                            send_password=False) as ssh_node:
                 # create tar.log file
                 cloud.compress_logs(ssh_node, node_name + ".tar.gz", chown="heat-admin:heat-admin")
