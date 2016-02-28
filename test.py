@@ -33,7 +33,7 @@ if __name__ == "__main__":
                                           local_file="clean_logs.sh",
                                           remote_file="/home/heat-admin/clean_logs.sh",
                                           chown="heat-admin:heat-admin")
-                ssh.send_cmd("sudo /home/heat-admin/clean_logs.sh", ignore_exit=True)
+                ssh_node.send_cmd("sudo /home/heat-admin/clean_logs.sh", ignore_exit=True)
         cloud.prepare_tempest_directory(ssh)
         cloud.prepare_tempest_roles(ssh)
         cloud.prepare_tempest_identity(ssh)
