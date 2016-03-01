@@ -21,6 +21,7 @@
   {
     "GIT_REPO" : "https://github.com/openstack/tempest.git",
     "REDHAT_REPO" : "https://github.com/redhat-openstack/tempest.git",
+    "DIRECTOR_TEMPEST":"",
     "WORKING_DIRECTORY" : "/home/stack",
     "YUM_INSTALL" : "gcc wget libxslt-devel libxml2-devel python-devel openssl-devel libffi-devel python-testtools",
     "PIP_INSTALL" : "junitxml tox virtualenv six",

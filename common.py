@@ -72,7 +72,7 @@ class UnderCloud(object):
                      .format(self.config["TEMPEST"]["YUM_INSTALL"]),
                      ignore_exit=True)
         ssh.send_cmd("sudo easy_install pip ", ignore_exit=True)
-        ssh.send_cmd("sudo pip install --upgrade "
+        ssh.send_cmd("sudo pip install --upgrade {0} "
                      .format(self.config["TEMPEST"]["PIP_INSTALL"]),
                      ignore_exit=True)
 
