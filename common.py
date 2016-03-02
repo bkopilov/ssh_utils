@@ -266,7 +266,7 @@ class UnderCloud(object):
         ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
         run_tempest = "cd {0} && testr run  --load-list={1} " \
                       "--subunit | tee >(subunit2junitxml " \
-                      "--output-to=xunit_temp.xml) | " \
+                      "--output-to=tempest.xml) | " \
                       "subunit-2to1 | {2} ".format(tempest_directory, tempest_directory + "/list-tests",
                                                    tempest_directory + "/colorizer.py")
         ssh.send_cmd(run_tempest, timeout=9600, ignore_exit=True)
@@ -285,7 +285,7 @@ class UnderCloud(object):
         self._prepare_tempest_public_net(ssh)
         self._prepare_tempest_conf_file(ssh)
         self._run_tempest_tests(ssh)
-        self._collect_testr_tests(ssh, local_dest_dir)
+        self._collect_testr_tests(ssh, local_dest_dir, "tempest")
 
     def prepare_and_run_tempest_downstream(self, ssh, local_dest_dir):
         self._prepare_packages_for_tempest(ssh)
@@ -315,20 +315,15 @@ class UnderCloud(object):
                                   self.config["TEMPEST"]["COLORIZED"])
         ssh.send_cmd(colorizer)
         ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
-        xml_set = " --subunit | tee >(subunit2junitxml --output-to=xunit_temp.xml)" \
-                  " | subunit-2to1 | {0}"\
-            .format(tempest_directory + "/colorizer.py")
-        run_tests = "./tools/run-tests.sh tempest {0}".format(xml_set)
+        run_tests = "./tools/run-tests.sh tempest"
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}".format(tempest_directory, run_tests))
-        self._collect_testr_tests(ssh, local_dest_dir)
+        self._collect_testr_tests(ssh, local_dest_dir, folder_name)
 
-
-
-    def _collect_testr_tests(self, ssh, local_dest_dir):
+    def _collect_testr_tests(self, ssh, local_dest_dir, tempest_git_name):
         ssh_conn = ssh.get_connection()
         sftp = ssh_conn.open_sftp()
-        remote_xunit_file = os.path.join(self.TEMPEST_DIR + "/tempest", "xunit_temp.xml")
-        local_xunit_file = os.path.join(local_dest_dir, "xunit_temp.xml")
+        remote_xunit_file = os.path.join(self.TEMPEST_DIR + "/" + tempest_git_name, "tempest.xml")
+        local_xunit_file = os.path.join(local_dest_dir, "tempest.xml")
         sftp.get(remote_xunit_file, local_xunit_file)
         sftp.close()
 
