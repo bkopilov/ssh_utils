@@ -207,7 +207,6 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} volume storage_protocol ceph"
                              .format(self.crudini_set))
 
-
     def _prepare_tempest_extension(self, ssh):
         # volume_ext
         extention_services = [["--compute", "compute-feature-enabled"],
@@ -287,6 +286,50 @@ class UnderCloud(object):
         self._prepare_tempest_conf_file(ssh)
         self._run_tempest_tests(ssh)
         self._collect_testr_tests(ssh, local_dest_dir)
+
+    def prepare_and_run_tempest_downstream(self, ssh, local_dest_dir):
+        self._prepare_packages_for_tempest(ssh)
+        ssh.send_cmd("mkdir {0}".format(self.TEMPEST_DIR))
+        tempest_directory = "cd {0} && ".format(self.TEMPEST_DIR)
+        ssh.send_cmd("cp -r {0} {1}"
+                     .format(self.config["TEMPEST"]["DIRECTOR_TEMPEST"] + "/",
+                             tempest_directory + "/"))
+        folder_name = self.config["TEMPEST"]["DIRECTOR_TEMPEST"].split("/")[-1]
+        tepmest_directory = tempest_directory + "/" + folder_name
+        ssh.send_cmd("sudo pip install -r {0}/test-requirements.txt"
+                     .format(tepmest_directory))
+        ssh.send_cmd("sudo pip install -r {0}/requirements.txt"
+                     .format(tepmest_directory))
+        self._add_neutron_public_network(ssh)
+        # configure tempest.con
+        configure_tempest_conf = "tools/config_tempest.py " \
+                                 "--deployer-input ~/tempest-deployer-input.conf" \
+                                 " --debug --create identity.uri" \
+                                 " $OS_AUTH_URL identity.admin_password" \
+                                 " $OS_PASSWORD"
+        ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}"
+                     .format(tepmest_directory, configure_tempest_conf))
+        tempest_directory += "/tempest"
+        testr_init = "cd {0} && testr init".format(tempest_directory)
+        ssh.send_cmd(testr_init)
+        filter_tests = self.config["TEMPEST"]["FILTER_TESTS"]
+        ssh.send_cmd("cd {0} && testr list-tests | {1} | tee  list-tests"
+                     .format(tempest_directory, filter_tests))
+        # download colorizer:
+        colorizer = "cd {0} &&  wget" \
+                    " {1}".format(tempest_directory,
+                                  self.config["TEMPEST"]["COLORIZED"])
+        ssh.send_cmd(colorizer)
+        ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
+        run_tempest = "cd {0} && testr run  --load-list={1} " \
+                      "--subunit | tee >(subunit2junitxml " \
+                      "--output-to=xunit_temp.xml) | " \
+                      "subunit-2to1 | {2} ".format(tempest_directory, tempest_directory + "/list-tests",
+                                                   tempest_directory + "/colorizer.py")
+        ssh.send_cmd(run_tempest, timeout=9600, ignore_exit=True)
+        self._collect_testr_tests(ssh, local_dest_dir)
+
+
 
     def _collect_testr_tests(self, ssh, local_dest_dir):
         ssh_conn = ssh.get_connection()

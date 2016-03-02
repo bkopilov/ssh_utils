@@ -40,7 +40,8 @@ if __name__ == "__main__":
                                           remote_file="/home/heat-admin/clean_logs.sh",
                                           chown="heat-admin:heat-admin")
                 ssh_node.send_cmd("sudo /home/heat-admin/clean_logs.sh", ignore_exit=True)
-        cloud.prepare_and_run_tempest_upstream(ssh, local_dest_dir=CWD)
+        #cloud.prepare_and_run_tempest_upstream(ssh, local_dest_dir=CWD)
+        cloud.prepare_and_run_tempest_downstream(ssh, local_dest_dir=CWD)
         # collect logs from overcloud per box
 
         for node in cloud.nodes:
