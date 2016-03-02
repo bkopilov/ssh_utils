@@ -318,7 +318,7 @@ class UnderCloud(object):
         xml_set = " --subunit | tee >(subunit2junitxml --output-to=xunit_temp.xml)" \
                   " | subunit-2to1 | {0}"\
             .format(tempest_directory + "/colorizer.py")
-        run_tests = "./tools/run-tests.sh tempest {0}"/format(xml_set)
+        run_tests = "./tools/run-tests.sh tempest {0}".format(xml_set)
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}".format(tempest_directory, run_tests))
         self._collect_testr_tests(ssh, local_dest_dir)
 
