@@ -290,16 +290,17 @@ class UnderCloud(object):
     def prepare_and_run_tempest_downstream(self, ssh, local_dest_dir):
         self._prepare_packages_for_tempest(ssh)
         ssh.send_cmd("mkdir {0}".format(self.TEMPEST_DIR))
-        tempest_directory = "cd {0} && ".format(self.TEMPEST_DIR)
+        folder_name = self.config["TEMPEST"]["DIRECTOR_TEMPEST"].split("/")[-1]
+        tempest_directory = self.TEMPEST_DIR
+        tempest_directory += "/" + folder_name
         ssh.send_cmd("cp -r {0} {1}"
                      .format(self.config["TEMPEST"]["DIRECTOR_TEMPEST"] + "/",
                              tempest_directory + "/"))
-        folder_name = self.config["TEMPEST"]["DIRECTOR_TEMPEST"].split("/")[-1]
-        tepmest_directory = tempest_directory + "/" + folder_name
+
         ssh.send_cmd("sudo pip install -r {0}/test-requirements.txt"
-                     .format(tepmest_directory))
+                     .format(tempest_directory))
         ssh.send_cmd("sudo pip install -r {0}/requirements.txt"
-                     .format(tepmest_directory))
+                     .format(tempest_directory))
         self._add_neutron_public_network(ssh)
         # configure tempest.con
         configure_tempest_conf = "tools/config_tempest.py " \
@@ -308,7 +309,7 @@ class UnderCloud(object):
                                  " $OS_AUTH_URL identity.admin_password" \
                                  " $OS_PASSWORD"
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}"
-                     .format(tepmest_directory, configure_tempest_conf))
+                     .format(tempest_directory, configure_tempest_conf))
         tempest_directory += "/tempest"
         testr_init = "cd {0} && testr init".format(tempest_directory)
         ssh.send_cmd(testr_init)
