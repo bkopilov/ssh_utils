@@ -20,7 +20,7 @@ if __name__ == "__main__":
         cloud.copy_from_workspace(ssh, local_dest_dir=CWD,
                                           local_file="tempest_cleanup.sh",
                                           remote_file="/home/stack/tempest_cleanup.sh",
-                                          chown="heat-admin:heat-admin")
+                                          chown="stack:stack")
         ssh.send_cmd("sudo /home/stack/tempest_cleanup.sh", ignore_exit=True)
         # copy private key to workspace
         cloud.copy_to_workspace(ssh, local_dest_dir=CWD, local_file="id_rsa.tar.gz",
