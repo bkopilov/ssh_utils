@@ -59,7 +59,7 @@ class UnderCloud(object):
             logger.info("Node: {0}".format(node))
 
     def _prepare_tempest_directory(self, ssh):
-        self.prepare_packages_for_tempest(ssh)
+        self._prepare_packages_for_tempest(ssh)
         ssh.send_cmd("mkdir {0}".format(self.TEMPEST_DIR))
         tepmest_directory = "cd {0} && ".format(self.TEMPEST_DIR)
         ssh.send_cmd("{0} git clone {1}".format(tepmest_directory, self.TEMPEST_URL))
