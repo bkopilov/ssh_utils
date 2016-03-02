@@ -315,7 +315,7 @@ class UnderCloud(object):
                                   self.config["TEMPEST"]["COLORIZED"])
         ssh.send_cmd(colorizer)
         ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
-        run_tests = "./tools/run-tests.sh tempest"
+        run_tests = "./tools/run-tests.sh tempest | tee tempest.results"
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}".format(tempest_directory, run_tests))
         self._collect_testr_tests(ssh, local_dest_dir, folder_name)
 
