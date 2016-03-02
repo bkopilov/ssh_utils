@@ -310,7 +310,6 @@ class UnderCloud(object):
                                  " $OS_PASSWORD"
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}"
                      .format(tempest_directory, configure_tempest_conf))
-        tempest_directory += "/tempest"
         #testr_init = "cd {0} && testr init".format(tempest_directory)
         #ssh.send_cmd(testr_init)
         #filter_tests = self.config["TEMPEST"]["FILTER_TESTS"]
