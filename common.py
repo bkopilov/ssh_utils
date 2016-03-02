@@ -58,7 +58,7 @@ class UnderCloud(object):
         for node in self.nodes:
             logger.info("Node: {0}".format(node))
 
-    def prepare_tempest_directory(self, ssh):
+    def _prepare_tempest_directory(self, ssh):
         self.prepare_packages_for_tempest(ssh)
         ssh.send_cmd("mkdir {0}".format(self.TEMPEST_DIR))
         tepmest_directory = "cd {0} && ".format(self.TEMPEST_DIR)
@@ -67,7 +67,7 @@ class UnderCloud(object):
         ssh.send_cmd("sudo pip install -r {0}/tempest/requirements.txt ".format(self.TEMPEST_DIR))
         ssh.send_cmd("sudo pip install -r  {0}/tempest/test-requirements.txt ".format(self.TEMPEST_DIR))
 
-    def prepare_packages_for_tempest(self, ssh):
+    def _prepare_packages_for_tempest(self, ssh):
         ssh.send_cmd("sudo yum install -y {0}"
                      .format(self.config["TEMPEST"]["YUM_INSTALL"]),
                      ignore_exit=True)
@@ -76,7 +76,7 @@ class UnderCloud(object):
                      .format(self.config["TEMPEST"]["PIP_INSTALL"]),
                      ignore_exit=True)
 
-    def prepare_tempest_roles(self, ssh):
+    def _prepare_tempest_roles(self, ssh):
         # role list:
         role_list = """ openstack role list | awk '{print $4}' | grep -v -E "^$|Name" """
         cmd = self.source_overcloudrc() + "&&" + role_list
@@ -93,7 +93,7 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} orchestration stack_owner_role "
                              "heat_stack_owner".format(self.crudini_set))
 
-    def prepare_tempest_debug(self):
+    def _prepare_tempest_debug(self):
         self.COMMANDS.append("{0} DEFAULT debug false"
                              .format(self.crudini_set))
         self.COMMANDS.append("{0} DEFAULT use_stderr false"
@@ -101,7 +101,7 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} DEFAULT log_file tempest.log"
                              .format(self.crudini_set))
 
-    def prepare_tempest_identity(self, ssh):
+    def _prepare_tempest_identity(self, ssh):
         # user-lists:
         user_list = """openstack user list  | awk '{print $4}' | grep -v -E "^$|Name" """
         tenant_list = """openstack project list  | awk '{print $4}' | grep -v -E "^$|Name" """
@@ -170,11 +170,11 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} identity admin_tenant_id {1}"
                              .format(self.crudini_set, admin_tenant_id[0]))
 
-    def prepare_tempest_oslo(self):
+    def _prepare_tempest_oslo(self):
         self.COMMANDS.append("{0} oslo_concurrency lock_path /tmp"
                              .format(self.crudini_set))
 
-    def prepare_tempest_services_enable(self):
+    def _prepare_tempest_services_enable(self):
         self.COMMANDS.append("{0} service_available neutron true".format(self.crudini_set))
         self.COMMANDS.append("{0} compute-feature-enabled resize true".format(self.crudini_set))
         self.COMMANDS.append("{0} compute-feature-enabled"
@@ -186,7 +186,7 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} compute-feature-enabled vnc_console true"
                              .format(self.crudini_set))
 
-    def prepare_tempest_image(self, ssh):
+    def _prepare_tempest_image(self, ssh):
         image_url = self.config["TEMPEST"]["IMAGE_URL"]
         image_name = image_url.split("/")[4]
         create_image = "openstack image create {0} " \
@@ -201,7 +201,14 @@ class UnderCloud(object):
         self.COMMANDS.append("{0} compute image_ref_alt {1}"
                              .format(self.crudini_set, image_id[0]))
 
-    def prepare_tempest_extension(self, ssh):
+    def _prepare_tempest_storage(self):
+        self.COMMANDS.append("{0} volume-feature-enabled backup false"
+                             .format(self.crudini_set))
+        self.COMMANDS.append("{0} volume storage_protocol ceph"
+                             .format(self.crudini_set))
+
+
+    def _prepare_tempest_extension(self, ssh):
         # volume_ext
         extention_services = [["--compute", "compute-feature-enabled"],
                               ("--identity", "identity-feature-enabled"),
@@ -217,18 +224,18 @@ class UnderCloud(object):
                                  .format(self.crudini_set, extention[1],
                                          ext_str))
 
-    def prepare_tempest_public_net(self, ssh):
+    def _prepare_tempest_public_net(self, ssh):
         # assume nova is the external network
         public_net = "openstack network list  -c ID -c Name| grep public | awk '{{ print $2}}'"
         public_network_id = ssh.send_cmd(self.source_overcloudrc() + "&& " + public_net)
         self.COMMANDS.append("{0} network public_network_id {1}"
                              .format(self.crudini_set, public_network_id[0]))
 
-    def prepare_tempest_conf_file(self, ssh):
+    def _prepare_tempest_conf_file(self, ssh):
         for line in self.COMMANDS:
             ssh.send_cmd(line)
 
-    def add_neutron_public_network(self, ssh):
+    def _add_neutron_public_network(self, ssh):
         net_add = "neutron net-create public --router:external" \
                   " --provider:network_type {0} " \
                   "--provider:physical_network {1} --provider:segmentation_id {2}"\
@@ -245,7 +252,7 @@ class UnderCloud(object):
         ssh.send_cmd(self.source_overcloudrc() + " && " + net_add)
         ssh.send_cmd(self.source_overcloudrc() + " && " + subnet_add)
 
-    def run_tempest_tests(self, ssh):
+    def _run_tempest_tests(self, ssh):
         tempest_directory = self.TEMPEST_DIR + "/tempest"
         testr_init = "cd {0} && testr init".format(tempest_directory)
         ssh.send_cmd(testr_init)
@@ -265,7 +272,23 @@ class UnderCloud(object):
                                                    tempest_directory + "/colorizer.py")
         ssh.send_cmd(run_tempest, timeout=9600, ignore_exit=True)
 
-    def collect_testr_tests(self, ssh, local_dest_dir):
+    def prepare_and_run_tempest_upstream(self, ssh, local_dest_dir):
+        self._prepare_tempest_directory(ssh)
+        self._prepare_tempest_roles(ssh)
+        self._prepare_tempest_identity(ssh)
+        self._prepare_tempest_oslo()
+        self._prepare_tempest_debug()
+        self._prepare_tempest_services_enable()
+        self._prepare_tempest_image(ssh)
+        self._prepare_tempest_storage()
+        self._prepare_tempest_extension(ssh)
+        self._add_neutron_public_network(ssh)
+        self._prepare_tempest_public_net(ssh)
+        self._prepare_tempest_conf_file(ssh)
+        self._run_tempest_tests(ssh)
+        self._collect_testr_tests(ssh, local_dest_dir)
+
+    def _collect_testr_tests(self, ssh, local_dest_dir):
         ssh_conn = ssh.get_connection()
         sftp = ssh_conn.open_sftp()
         remote_xunit_file = os.path.join(self.TEMPEST_DIR + "/tempest", "xunit_temp.xml")

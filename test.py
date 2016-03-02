@@ -35,19 +35,7 @@ if __name__ == "__main__":
                                           remote_file="/home/heat-admin/clean_logs.sh",
                                           chown="heat-admin:heat-admin")
                 ssh_node.send_cmd("sudo /home/heat-admin/clean_logs.sh", ignore_exit=True)
-        cloud.prepare_tempest_directory(ssh)
-        cloud.prepare_tempest_roles(ssh)
-        cloud.prepare_tempest_identity(ssh)
-        cloud.prepare_tempest_oslo()
-        cloud.prepare_tempest_debug()
-        cloud.prepare_tempest_services_enable()
-        cloud.prepare_tempest_image(ssh)
-        cloud.prepare_tempest_extension(ssh)
-        cloud.add_neutron_public_network(ssh)
-        cloud.prepare_tempest_public_net(ssh)
-        cloud.prepare_tempest_conf_file(ssh)
-        cloud.run_tempest_tests(ssh)
-        cloud.collect_testr_tests(ssh, local_dest_dir=CWD)
+        cloud.prepare_and_run_tempest_upstream(ssh, local_dest_dir=CWD)
         # collect logs from overcloud per box
 
         for node in cloud.nodes:
