@@ -310,24 +310,15 @@ class UnderCloud(object):
                                  " $OS_PASSWORD"
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}"
                      .format(tempest_directory, configure_tempest_conf))
-        #testr_init = "cd {0} && testr init".format(tempest_directory)
-        #ssh.send_cmd(testr_init)
-        #filter_tests = self.config["TEMPEST"]["FILTER_TESTS"]
-        #ssh.send_cmd("cd {0} && testr list-tests | {1} | tee  list-tests"
-        #             .format(tempest_directory, filter_tests))
-        # download colorizer:
-        #colorizer = "cd {0} &&  wget" \
-        #            " {1}".format(tempest_directory,
-        #                          self.config["TEMPEST"]["COLORIZED"])
-        #ssh.send_cmd(colorizer)
-        #ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
-        #run_tempest = "cd {0} && testr run  --load-list={1} " \
-        #              "--subunit | tee >(subunit2junitxml " \
-        #              "--output-to=xunit_temp.xml) | " \
-        #              "subunit-2to1 | {2} ".format(tempest_directory, tempest_directory + "/list-tests",
-        #                                           tempest_directory + "/colorizer.py")
-        #ssh.send_cmd(run_tempest, timeout=9600, ignore_exit=True)
-        run_tests = "./tools/run-tests.sh tempest | tee bkopilov_tempest.results"
+        colorizer = "cd {0} &&  wget" \
+                    " {1}".format(tempest_directory,
+                                  self.config["TEMPEST"]["COLORIZED"])
+        ssh.send_cmd(colorizer)
+        ssh.send_cmd("cd {0} && sudo chmod 755 colorizer.py".format(tempest_directory))
+        xml_set = " --subunit | tee >(subunit2junitxml --output-to=xunit_temp.xml)" \
+                  " | subunit-2to1 | {0}"\
+            .format(tempest_directory + "/colorizer.py")
+        run_tests = "./tools/run-tests.sh tempest {0}"/format(xml_set)
         ssh.send_cmd(self.source_overcloudrc() + "&&" + " cd {0} && {1}".format(tempest_directory, run_tests))
         self._collect_testr_tests(ssh, local_dest_dir)
 
