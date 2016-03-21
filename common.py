@@ -301,6 +301,8 @@ class UnderCloud(object):
                      .format(tempest_directory))
         ssh.send_cmd("sudo pip install -r {0}/requirements.txt"
                      .format(tempest_directory))
+        ssh.send_cmd("sudo pip uninstall -y six", ignore_exit=True)
+        ssh.send_cmd("sudo pip install six", ignore_exit=True)
         self._add_neutron_public_network(ssh)
         # configure tempest.con
         configure_tempest_conf = "tools/config_tempest.py " \
